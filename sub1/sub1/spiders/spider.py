@@ -23,5 +23,15 @@ class QuotesSpider(scrapy.Spider):
     # 게시물에서 정보 크롤링
     def parse_article(self, response):
         item = items.Sub1Item()
+        # item['nttId'] = response.xpath(링크로 구하기!!!)
+        # 데이터 가공하기 !!!
         item['title'] = response.xpath('//*[@id="print_area"]/form/div[1]/h4/text()').get()
+        item['wdate'] = response.xpath('//*[@id="print_area"]/form/div[1]/div[2]/span[1]/text()').get()
+        item['author'] = response.xpath('//*[@id="print_area"]/form/div[1]/div[2]/span[2]/text()').get()
+        item['readcount'] = response.xpath('//*[@id="print_area"]/form/div[1]/div[2]/span[3]/text()').get()
+
+        item['imgnum'] = response.xpath('//*[@id="print_area"]/form/div[1]/div[3]/div/ul/li/p/a/@href').getall()
+        item['contentnum'] = response.xpath('//*[@id="print_area"]/form/div[1]/div[3]/div/ul/li/p/text()').getall()
+
+        item['imgpath'] = response.xpath('//*[@id="print_area"]/form/div[1]/dl[1]/dd/div/ul/li/a[1]/@href').getall() # 링크에 모두 https://www.mois.go.kr/ 앞에 붙여주기
         yield item
