@@ -10,7 +10,7 @@ from datetime import datetime
 now = datetime.now()
 
 class Sub1Item(scrapy.Item):
-    # nttId = scrapy.Field() # 게시물 번호 (URL 에서 parsing 해야 하지 않을까 싶음.. 필수!!  보류)
+    nttId = scrapy.Field() # 게시물 번호 (URL 에서 parsing 해야 하지 않을까 싶음.. 필수!!  보류)
     title = scrapy.Field() # 글 제목
     wdate = scrapy.Field() # 등록일
     author = scrapy.Field() # 작성자

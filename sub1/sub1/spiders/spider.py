@@ -3,6 +3,10 @@ from scrapy import Spider
 
 from .. import items
 
+from urllib.parse import urljoin
+
+import re
+
 
 class QuotesSpider(scrapy.Spider):
     # 스파이더 이름(실행 시)
@@ -23,15 +27,42 @@ class QuotesSpider(scrapy.Spider):
     # 게시물에서 정보 크롤링
     def parse_article(self, response):
         item = items.Sub1Item()
-        # item['nttId'] = response.xpath(링크로 구하기!!!)
-        # 데이터 가공하기 !!!
+
+        # 게시물의 URL에서 nttId 추출
+        url = response.url
+        nttId = url.split('nttId=')[1].split('&')[0] if 'nttId=' in url else None
+
+        item['nttId'] = nttId
         item['title'] = response.xpath('//*[@id="print_area"]/form/div[1]/h4/text()').get()
-        item['wdate'] = response.xpath('//*[@id="print_area"]/form/div[1]/div[2]/span[1]/text()').get()
-        item['author'] = response.xpath('//*[@id="print_area"]/form/div[1]/div[2]/span[2]/text()').get()
-        item['readcount'] = response.xpath('//*[@id="print_area"]/form/div[1]/div[2]/span[3]/text()').get()
+        wdate_text = response.xpath('//*[@id="print_area"]/form/div[1]/div[2]/span[1]/text()').get()
+        if wdate_text:
+            wdate = wdate_text.replace('등록일 : ', '').strip()
+        else:
+            wdate = None  # 또는 다른 기본값을 설정하시면 됩니다.
 
-        item['imgnum'] = response.xpath('//*[@id="print_area"]/form/div[1]/div[3]/div/ul/li/p/a/@href').getall()
-        item['contentnum'] = response.xpath('//*[@id="print_area"]/form/div[1]/div[3]/div/ul/li/p/text()').getall()
+        item['wdate'] = wdate
 
-        item['imgpath'] = response.xpath('//*[@id="print_area"]/form/div[1]/dl[1]/dd/div/ul/li/a[1]/@href').getall() # 링크에 모두 https://www.mois.go.kr/ 앞에 붙여주기
+        author_text = response.xpath('//*[@id="print_area"]/form/div[1]/div[2]/span[2]/text()').get()
+        if author_text:
+            item['author'] = author_text.replace('작성자 : ', '')
+        else:
+            item['author'] = None
+
+        readcount_text = response.xpath('//*[@id="print_area"]/form/div[1]/div[2]/span[3]/text()').get()
+        if readcount_text:
+            readcount = int(readcount_text.replace('조회수 : ', ''))
+        else:
+            readcount = 0
+
+        item['readcount'] = readcount
+
+        imgnum_list = response.xpath('//*[@id="print_area"]/form/div[1]/div[3]/div/ul/li/p/a/@href').getall()
+        file_sn_list = [re.search(r'fileSn=(\d+)', img_url).group(1) for img_url in imgnum_list]
+        item['imgnum'] = file_sn_list
+
+        content_list = response.xpath('//*[@id="print_area"]/form/div[1]/div[3]/div/ul/li/p/text()').getall()
+        item['contentnum'] = [content.strip() for content in content_list if content.strip()]
+
+        imgpath_list = response.xpath('//*[@id="print_area"]/form/div[1]/dl[1]/dd/div/ul/li/a[1]/@href').getall()
+        item['imgpath'] = [urljoin('https://www.mois.go.kr/', path) for path in imgpath_list]
         yield item
