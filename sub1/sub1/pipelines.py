@@ -4,6 +4,8 @@ from scrapy.pipelines.images import ImagesPipeline
 from urllib.parse import urlparse, parse_qs
 import os
 
+import pymysql
+
 
 class CustomImagesPipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
