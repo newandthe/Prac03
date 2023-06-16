@@ -61,7 +61,7 @@ class QuotesSpider(scrapy.Spider):
 
         item['readcount'] = readcount
 
-        rel_img_urls = response.xpath('//*[@id="print_area"]/form/div[1]/div[3]/div/ul/li/p/a/@href').getall()
+        # rel_img_urls = response.xpath('//*[@id="print_area"]/form/div[1]/div[3]/div/ul/li/p/a/@href').getall()
 
         imgsrc_list = response.xpath('//*[@id="print_area"]/form/div[1]/div[3]/div/ul/li/p/a/@href').getall()
 
