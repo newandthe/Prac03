@@ -94,8 +94,8 @@ ITEM_PIPELINES = {
 
 # 저장경로
 ITEM_PIPELINES = {'scrapy.pipelines.files.Sub2Pipeline': 1}
-FILES_STORE = 'd:/Prac03_Download/sub02/'
-IMAGES_STORE = 'd:/Prac03_Download/sub02/'
+FILES_STORE = 'c:/Prac03_Download/sub02/'
+IMAGES_STORE = 'c:/Prac03_Download/sub02/'
 
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"

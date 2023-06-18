@@ -1,10 +1,20 @@
 import scrapy
 from scrapy import Spider
 from .. import items
+import mysql.connector
+from mysql.connector import Error
 
 from urllib.parse import urljoin
 
 import re
+
+# MySQL 연결 설정
+connection = mysql.connector.connect(
+    host="localhost",
+    database="prac03",  # 사용할 데이터베이스 스키마 이름
+    user="root",  # MySql 사용자 이름
+    password="1234"  # MySql 비밀번호 설정
+)
 
 
 class QuotesSpider(scrapy.Spider):
@@ -17,8 +27,8 @@ class QuotesSpider(scrapy.Spider):
 
     def start_requests(self):
         url = "https://www.mois.go.kr/frt/bbs/type010/commonSelectBoardList.do?bbsId=BBSMSTR_000000000008&searchCnd=&searchWrd=&pageIndex=%s"
-        start_page = 1 # start page 정의
-        for i in range(3): # 1부터 3번 페이지까지 (i는 0부터 시작)
+        start_page = 1  # start page 정의
+        for i in range(3):  # 1부터 3번 페이지까지 (i는 0부터 시작)
             yield scrapy.Request(url % (i + start_page), self.parse_start)
 
     # 게시물 상세 페이지 url로 request
