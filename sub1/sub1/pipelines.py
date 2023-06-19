@@ -4,8 +4,6 @@ from scrapy.pipelines.images import ImagesPipeline
 from urllib.parse import urlparse, parse_qs
 import os
 
-import pymysql
-
 
 class CustomImagesPipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
@@ -25,4 +23,5 @@ class CustomImagesPipeline(ImagesPipeline):
     def item_completed(self, results, item, info):
         if 'image_urls' in item:
             item['imgpath'] = [x['path'] for ok, x in results if ok]
+
         return item
