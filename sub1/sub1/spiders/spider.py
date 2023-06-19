@@ -3,7 +3,8 @@ from scrapy import Spider
 from .. import items
 
 from urllib.parse import urljoin
-
+import mysql.connector
+from mysql.connector import Error
 import re
 
 
@@ -16,9 +17,9 @@ class QuotesSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        url = 'https://www.mois.go.kr/frt/bbs/type002/commonSelectBoardList.do?bbsId=BBSMSTR_000000000010&searchCnd=&searchWrd=&pageIndex=%s' # %s
+        url = 'https://www.mois.go.kr/frt/bbs/type002/commonSelectBoardList.do?bbsId=BBSMSTR_000000000010&searchCnd=&searchWrd=&pageIndex=%s'  # %s
         start_page = 1  # start page 정의
-        for i in range(3): # 1부터 3번 페이지까지 (i는 0부터 시작)
+        for i in range(3):  # 1부터 3번 페이지까지 (i는 0부터 시작)
             yield scrapy.Request(url % (i + start_page), self.parse_start)
 
     # 게시물 상세 페이지 url로 request
@@ -75,6 +76,9 @@ class QuotesSpider(scrapy.Spider):
 
         item['image_urls'] = self.url_join(imgpath_list, response)
 
+        # DB에 아이템 삽입
+        insert_item_to_db(item)
+
         # print(item)
         yield item
 
@@ -85,3 +89,36 @@ class QuotesSpider(scrapy.Spider):
 
         return joined_urls
 
+
+# MySQL 연결 설정
+connection = mysql.connector.connect(
+    host="localhost",
+    database="prac03",  # 사용할 데이터베이스 스키마 이름
+    user="root",  # MySql 사용자 이름
+    password="1234"  # MySql 비밀번호 설정
+)
+
+
+# DB에 아이템을 삽입하는 함수
+def insert_item_to_db(item):
+    try:
+        cursor = connection.cursor()
+
+        # INSERT 쿼리
+        query = "INSERT INTO sub01 (nttId, title, wdate, author, readcount, contentnum, image_urls, imgpath) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        values = (
+            item['nttId'],
+            item['title'],
+            item['wdate'],
+            item['author'],
+            item['readcount'],
+            ', '.join(item['contentnum']),
+            ', '.join(item['image_urls']),
+            ', '.join(item['imgpath'])
+        )
+        cursor.execute(query, values)
+        connection.commit()
+        cursor.close()
+
+    except Error as e:
+        print("DB 삽입 에러 발생", e)
