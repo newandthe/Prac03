@@ -17,7 +17,7 @@ NEWSPIDER_MODULE = "sub3.spiders"
 #USER_AGENT = "sub3 (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -62,9 +62,9 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    "sub3.pipelines.Sub3Pipeline": 300,
-#}
+ITEM_PIPELINES = {
+   "sub3.pipelines.Sub3Pipeline": 3,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -88,6 +88,13 @@ ROBOTSTXT_OBEY = True
 #HTTPCACHE_STORAGE = "scrapy.extensions.httpcache.FilesystemCacheStorage"
 
 # Set settings whose default value is deprecated to a future-proof value
+
+# 저장경로
+FILES_STORE = 'd:/Prac03_Download/sub03/'
+IMAGES_STORE = 'd:/Prac03_Download/sub03/'
+
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
 FEED_EXPORT_ENCODING = "utf-8"
+MEDIA_ALLOW_REDIRECTS = True
+
