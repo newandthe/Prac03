@@ -22,14 +22,14 @@ def insert_item_to_db(item):
         query = "INSERT INTO sub02 (nttId, title_main, title_sub, wdate, author, readcount, content, filesrc, file_path) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
         values = (
             item['nttId'],
-            ', '.join(item['title_main']),
+            ' &&& '.join(item['title_main']),
             item['title_sub'],
             item['wdate'],
             item['author'],
             item['readcount'],
             item['content'],
-            ', '.join(item['filesrc']),
-            ', '.join(item['file_path'])
+            ' &&& '.join(item['filesrc']),
+            ' &&& '.join(item['file_path'])
         )
         cursor.execute(query, values)
         connection.commit()
