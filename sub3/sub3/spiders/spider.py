@@ -6,63 +6,52 @@ import re
 class QuotesSpider(scrapy.Spider):
     name = "sub03"
     start_page = 1  # 크롤링 시작 페이지
-    end_page = 2  # 크롤링 끝 페이지
 
     def start_requests(self):
         urls = [
-            f"https://www.yna.co.kr/politics/all/{page}" for page in range(self.start_page, self.end_page + 1)
-        ]
-        urls += [
-            f"https://www.yna.co.kr/economy/all/{page}" for page in range(self.start_page, self.end_page + 1)
-        ]
-        urls += [
-            f"https://www.yna.co.kr/north-korea/all/{page}" for page in range(self.start_page, self.end_page + 1)
-        ]
-        urls += [
-            f"https://www.yna.co.kr/industry/all/{page}" for page in range(self.start_page, self.end_page + 1)
-        ]
-        urls += [
-            f"https://www.yna.co.kr/society/all/{page}" for page in range(self.start_page, self.end_page + 1)
-        ]
-        urls += [
-            f"https://www.yna.co.kr/local/all/{page}" for page in range(self.start_page, self.end_page + 1)
-        ]
-        urls += [
-            f"https://www.yna.co.kr/international/all/{page}" for page in range(self.start_page, self.end_page + 1)
-        ]
-        urls += [
-            f"https://www.yna.co.kr/culture/all/{page}" for page in range(self.start_page, self.end_page + 1)
-        ]
-        urls += [
-            f"https://www.yna.co.kr/lifestyle/all/{page}" for page in range(self.start_page, self.end_page + 1)
-        ]
-        urls += [
-            f"https://www.yna.co.kr/entertainment/all/{page}" for page in range(self.start_page, self.end_page + 1)
-        ]
-        urls += [
-            f"https://www.yna.co.kr/sports/all/{page}" for page in range(self.start_page, self.end_page + 1)
-        ]
-        urls += [
-            f"https://www.yna.co.kr/opinion/advisory/{page}" for page in range(self.start_page, self.end_page + 1)
-        ]
-        urls += [
-            f"https://www.yna.co.kr/opinion/editorials/{page}" for page in range(self.start_page, self.end_page + 1)
-        ]
-        urls += [
-            f"https://www.yna.co.kr/people/all/{page}" for page in range(self.start_page, self.end_page + 1)
+            f"https://www.yna.co.kr/politics/all/{self.start_page}",
+            f"https://www.yna.co.kr/economy/all/{self.start_page}",
+            f"https://www.yna.co.kr/north-korea/all/{self.start_page}",
+            f"https://www.yna.co.kr/industry/all/{self.start_page}",
+            f"https://www.yna.co.kr/society/all/{self.start_page}",
+            f"https://www.yna.co.kr/local/all/{self.start_page}",
+            f"https://www.yna.co.kr/international/all/{self.start_page}",
+            f"https://www.yna.co.kr/culture/all/{self.start_page}",
+            f"https://www.yna.co.kr/lifestyle/all/{self.start_page}",
+            f"https://www.yna.co.kr/entertainment/all/{self.start_page}",
+            f"https://www.yna.co.kr/sports/all/{self.start_page}",
+            f"https://www.yna.co.kr/opinion/advisory/{self.start_page}",
+            f"https://www.yna.co.kr/opinion/editorials/{self.start_page}",
+            f"https://www.yna.co.kr/people/all/{self.start_page}"
         ]
 
-
-        #
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        # 현재 페이지에서 기사 URL 추출
         article_links = response.xpath(
             '//*[@id="container"]/div/div/div[1]/section/div[1]/ul/li/div/div[2]/a/@href').getall()
         for article_link in article_links:
             yield response.follow(article_link, callback=self.parse_article)
+
+        # 현재 페이지의 숫자를 추출
+        current_page = int(response.css('div.paging.paging-type01 strong.num.on::text').get())
+
+        # 다음 페이지의 숫자를 계산
+        next_page = current_page + 1
+
+        # 다음 페이지의 URL을 생성
+        next_page_url = response.url.replace(f"/{current_page}", f"/{next_page}")
+
+        # 다음 페이지로 이동하기 전에 다음 페이지의 링크 유무를 확인
+        next_page_link = response.css('div.paging.paging-type01 a.num::attr(href)').get()
+        if not next_page_link:
+            next_page_link = response.css('div.paging.paging-type01 a.next::attr(href)').get()
+            if not next_page_link:
+                return
+
+        # 다음 페이지로 이동
+        yield response.follow(next_page_url, callback=self.parse)
 
     def parse_article(self, response):
         item = items.Sub3Item()
@@ -76,6 +65,7 @@ class QuotesSpider(scrapy.Spider):
         if match:
             nttid = match.group(0)
             item['nttId'] = nttid
+
         category = response.xpath('//*[@id="articleWrap"]/div[1]/header/ul[1]/li[2]/a/text()').get()
         item['category'] = category or "북한"
 

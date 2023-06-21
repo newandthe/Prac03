@@ -18,7 +18,7 @@ class QuotesSpider(scrapy.Spider):
     def start_requests(self):
         url = 'https://www.mois.go.kr/frt/bbs/type002/commonSelectBoardList.do?bbsId=BBSMSTR_000000000010&searchCnd=&searchWrd=&pageIndex=%s'  # %s
         start_page = 1  # start page 정의
-        for i in range(3):  # 1부터 3번 페이지까지 (i는 0부터 시작)
+        for i in range(432):  # 1부터 3번 페이지까지 (i는 0부터 시작)
             yield scrapy.Request(url % (i + start_page), self.parse_start)
 
     # 게시물 상세 페이지 url로 request

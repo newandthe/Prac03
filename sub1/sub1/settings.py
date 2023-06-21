@@ -27,10 +27,6 @@ ROBOTSTXT_OBEY = False
 # 문서 : https://shahzaibchadhar.medium.com/how-to-use-scrapy-for-image-download-using-pipelines-in-python-37be4cce6c18
 # IMAGES_STORE = 'D:/Prac03_Download/sub01'  # folder name or path where to save images
 # DOWNLOAD_DELAY = 2  # delay in downloading images
-ITEM_PIPELINES = {
-    'sub1.pipelines.images.Sub1Pipeline': 1
-}
-IMAGES_STORE = "sub1/images"
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
 # CONCURRENT_REQUESTS_PER_IP = 16
@@ -71,8 +67,8 @@ IMAGES_STORE = "sub1/images"
 #     'apt_collection.pipelines.AptCollectionPipeline': 1
 # }
 ITEM_PIPELINES = {'scrapy.pipelines.images.ImagesPipeline': 1}
-FILES_STORE = 'd:/Prac03_Download/sub01/'
-IMAGES_STORE = 'd:/Prac03_Download/sub01/'      # 저장경로
+FILES_STORE = '/home/jsk/sub01'
+IMAGES_STORE = '/home/jsk/sub01'
 
 
 
