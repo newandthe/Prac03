@@ -8,33 +8,25 @@ from urllib.parse import urljoin
 
 import re
 
-# MySQL 연결 설정
-connection = mysql.connector.connect(
-    host="localhost",
-    database="prac03",  # 사용할 데이터베이스 스키마 이름
-    user="root",  # MySql 사용자 이름
-    password="1234"  # MySql 비밀번호 설정
-)
-
 
 class QuotesSpider(scrapy.Spider):
     # 스파이더 이름(실행)
     name = "sub02"
 
     custom_settings = {
-        'ITEM_PIPELINES': {'sub2.pipelines.CustomFilePipeline': 1}
+        'ITEM_PIPELINES': {'sub2.pipelines.Sub2Pipeline': 1}
     }
 
     def start_requests(self):
         url = "https://www.mois.go.kr/frt/bbs/type010/commonSelectBoardList.do?bbsId=BBSMSTR_000000000008&searchCnd=&searchWrd=&pageIndex=%s"
         start_page = 1  # start page 정의
-        for i in range(3):  # 1부터 3번 페이지까지 (i는 0부터 시작)
+        for i in range(1451):  # 1부터 3번 페이지까지 (i는 0부터 시작)
             yield scrapy.Request(url % (i + start_page), self.parse_start)
 
     # 게시물 상세 페이지 url로 request
     def parse_start(self, response):
         article_url = "https://www.mois.go.kr"
-        article_id = response.xpath('//*[@id="print_area"]/div[2]/form/table/tbody/tr[1]/td[2]/div/a/@href').extract()
+        article_id = response.xpath('//*[@id="print_area"]/div[2]/form/table/tbody/tr/td[2]/div/a/@href').extract()
         for d in article_id:
             url = article_url + d
             yield scrapy.Request(url, self.parse_article)
@@ -72,7 +64,7 @@ class QuotesSpider(scrapy.Spider):
         filename = response.xpath('//*[@id="print_area"]/form/div/dl[1]/dd/div/ul/li/a[1]/text()').getall()
         parsed_filenames = []
         for fn in filename:
-            parsed_fn = re.search(r'(\d{6}.*\.(hwpx|pdf))', fn)
+            parsed_fn = re.search(r'(\d{6}.*\.(hwpx|pdf|hwp))', fn)
             if parsed_fn:
                 parsed_filenames.append(parsed_fn.group(1))
 

@@ -7,23 +7,26 @@ import os
 import mysql.connector
 from mysql.connector import Error
 
-# MySQL 연결 설정
-connection = mysql.connector.connect(
-    host="localhost",
-    database="prac03",  # 사용할 데이터베이스 스키마 이름
-    user="root",  # MySql 사용자 이름
-    password="1234"  # MySql 비밀번호 설정
-)
+
+import pymysql
+
+
+conn = pymysql.connect(host='172.30.1.100',
+                       port=3306,
+                       db="prac01",  # 사용할 데이터베이스 스키마 이름
+                       user="jsk",  # MySql 사용자 이름
+                       password="1234",
+                       charset='utf8')
 
 
 # DB에 아이템을 삽입하는 함수
 def insert_item_to_db(item):
     try:
-        cursor = connection.cursor()
+        cursor = conn.cursor()
 
         # INSERT 쿼리
-        query = "INSERT INTO sub01 (nttId, title, wdate, author, readcount, contentnum, image_urls, imgpath) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        values = (
+        sql = "INSERT INTO sub01 (nttId, title, wdate, author, readcount, contentnum, image_urls, imgpath) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        cursor.execute (sql, (
             item['nttId'],
             item['title'],
             item['wdate'],
@@ -33,8 +36,8 @@ def insert_item_to_db(item):
             ' &&& '.join(item['image_urls']),
             ' &&& '.join(item['imgpath'])
         )
-        cursor.execute(query, values)
-        connection.commit()
+        )
+        conn.commit()
         cursor.close()
 
     except Error as e:

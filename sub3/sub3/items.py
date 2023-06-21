@@ -16,7 +16,6 @@ class Sub3Item(scrapy.Item):
     sub_title = scrapy.Field()
     author = scrapy.Field()
     date = scrapy.Field()
-    sub_title = scrapy.Field()
     content = scrapy.Field()
     url_link = scrapy.Field()
     imgsrc = scrapy.Field()

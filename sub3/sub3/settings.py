@@ -90,8 +90,8 @@ ITEM_PIPELINES = {
 # Set settings whose default value is deprecated to a future-proof value
 
 # 저장경로
-FILES_STORE = 'd:/Prac03_Download/sub03/'
-IMAGES_STORE = 'd:/Prac03_Download/sub03/'
+FILES_STORE = '/home/sub03'
+IMAGES_STORE = '/home/sub03'
 
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"
 TWISTED_REACTOR = "twisted.internet.asyncioreactor.AsyncioSelectorReactor"
