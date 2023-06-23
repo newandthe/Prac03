@@ -1,3 +1,5 @@
+import hashlib
+
 import scrapy
 from scrapy.pipelines.files import FilesPipeline
 import os
@@ -20,20 +22,42 @@ def insert_item_to_db(item):
     try:
         cursor = conn.cursor()
 
-        # INSERT 쿼리
-        sql = "INSERT INTO sub02 (nttId, title_main, title_sub, wdate, author, readcount, content, filesrc, file_path) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        cursor.execute (sql, (
+        # INSERT 쿼리 (테이블)
+        sql = "INSERT INTO sub04 (nttId, domain, title, sub_title, wdate, author, readcount, content, url_link, category) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        cursor.execute(sql, (
             item['nttId'],
+            item['domain'],
             ' &&& '.join(item['title_main']),
             item['title_sub'],
             item['wdate'],
             item['author'],
             item['readcount'],
             item['content'],
-            ' &&& '.join(item['filesrc']),
-            ' &&& '.join(item['file_path'])
+            item['url_link'],
+            item['category']
+            # ' &&& '.join(item['filesrc']),
+            # ' &&& '.join(item['file_path'])
         )
         )
+
+        # INSERT 쿼리 (데이터)
+        sql = "INSERT INTO datafile (nttId, origin_name, file_hash, filesrc) VALUES (%s, %s, %s, %s)"
+
+        nttId = item['nttId']
+        original_filename = item['filename']
+        filesrc = item['filesrc']
+        file_path = item['file_path']
+
+        listlen = len(original_filename)
+
+        for i in range(listlen):
+            cursor.execute(sql, (
+                nttId,
+                original_filename[i],
+                file_path[i],
+                filesrc[i]
+            ))
+
         conn.commit()
         cursor.close()
 
@@ -49,8 +73,11 @@ class Sub2Pipeline(FilesPipeline):
     def file_path(self, request, response=None, info=None, *, item=None):
         item = request.meta['item']
         file_name = item['filename'][item['filesrc'].index(request.url)]
+        filter_filename, filter_extention = os.path.splitext(file_name)
+        newfilename = hashlib.sha256(filter_filename.encode()).hexdigest()
+
         ntt_id = item['nttId']
-        file_path = f"{ntt_id}_{file_name}"
+        file_path = f"{ntt_id}/{newfilename}{filter_extention}"
         return file_path
 
     def item_completed(self, results, item, info):

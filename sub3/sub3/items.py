@@ -19,9 +19,10 @@ class Sub3Item(scrapy.Item):
     content = scrapy.Field()
     url_link = scrapy.Field()
     imgsrc = scrapy.Field()
+    domain = Field()
 
     # 크롤링 이미지 다운로드에 필요한 필수 요소 두가지
     image_urls = scrapy.Field()
     images = scrapy.Field()
 
-    imgpath = scrapy.Field() # 파일이 저장될 제목
+    file_path = scrapy.Field() # 파일이 저장될 제목

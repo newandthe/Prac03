@@ -1,6 +1,7 @@
 import scrapy
 from .. import items
 import re
+import hashlib
 
 
 class QuotesSpider(scrapy.Spider):
@@ -56,19 +57,26 @@ class QuotesSpider(scrapy.Spider):
     def parse_article(self, response):
         item = items.Sub3Item()
 
+        # 게시물의 URL에서 nttId 추출
         url = response.url
         item['url_link'] = url
+        url_bytes = url.encode('utf-8')
 
-        pattern = r'AKR(\d{17})'
-        match = re.search(pattern, url)
+        # SHA-256 해시 객체 생성
+        sha256_hash = hashlib.sha256()
 
-        if match:
-            nttid = match.group(0)
-            item['nttId'] = nttid
+        # URL의 해시값 계산
+        sha256_hash.update(url_bytes)
 
+        # 해시값 추출
+        hash_value = sha256_hash.hexdigest()
+
+        nttId = hash_value
+
+        item['nttId'] = nttId
         category = response.xpath('//*[@id="articleWrap"]/div[1]/header/ul[1]/li[2]/a/text()').get()
         item['category'] = category or "북한"
-
+        item['domain'] = "yna"
         item['main_title'] = response.css("header h1::text").get()
         item['sub_title'] = response.xpath('//*[@id="articleWrap"]/div[2]/div/div/article/div[2]/h2/text()').getall()
         item['author'] = response.css(".tit-name::text").getall()
@@ -79,6 +87,6 @@ class QuotesSpider(scrapy.Spider):
         content = [c.strip() for c in content if c.strip()]
         item['content'] = ' '.join(content)
         imgsrc = response.xpath('//*[@id="articleWrap"]/div[2]/div/div/article/div/figure/div/span/img/@src').getall()
-        item['imgsrc'] = ['https:' + url for url in imgsrc]
+        item['imgsrc'] = ['https:' + url for url in imgsrc]         # filesrc 컬럼에 저장될 항목
 
         yield item

@@ -8,6 +8,8 @@ from urllib.parse import urljoin
 
 import re
 
+import hashlib
+
 
 class QuotesSpider(scrapy.Spider):
     # 스파이더 이름(실행)
@@ -20,7 +22,7 @@ class QuotesSpider(scrapy.Spider):
     def start_requests(self):
         url = "https://www.mois.go.kr/frt/bbs/type010/commonSelectBoardList.do?bbsId=BBSMSTR_000000000008&searchCnd=&searchWrd=&pageIndex=%s"
         start_page = 1  # start page 정의
-        for i in range(1451):  # 1부터 3번 페이지까지 (i는 0부터 시작)
+        for i in range(1452):  # 1부터 3번 페이지까지 (i는 0부터 시작)
             yield scrapy.Request(url % (i + start_page), self.parse_start)
 
     # 게시물 상세 페이지 url로 request
@@ -36,9 +38,24 @@ class QuotesSpider(scrapy.Spider):
         item = items.Sub2Item()
 
         # 게시물의 URL에서 nttId 추출
+        # 게시물의 URL에서 nttId 추출
         url = response.url
-        nttId = url.split('nttId=')[1].split('&')[0] if 'nttId=' in url else None
+        item['url_link'] = url
+        url_bytes = url.encode('utf-8')
 
+        # SHA-256 해시 객체 생성
+        sha256_hash = hashlib.sha256()
+
+        # URL의 해시값 계산
+        sha256_hash.update(url_bytes)
+
+        # 해시값 추출
+        hash_value = sha256_hash.hexdigest()
+
+        nttId = hash_value
+
+        item['category'] = "행안부 파일"
+        item['domain'] = "mois"
         item['nttId'] = nttId
 
         title_main = response.xpath('//*[@id="print_area"]/form/div/h4/text()').extract()
@@ -49,7 +66,10 @@ class QuotesSpider(scrapy.Spider):
         item['title_sub'] = ' '.join(title_sub)
 
         text = response.xpath('/html/body/div/div[8]/div/div[2]/div[4]/form/div/div[2]/text()').extract()
-        item['wdate'] = text[2].split(':')[-1].strip()
+        wdate_parsed = text[2].split(':')[-1].strip()
+        wdate = wdate_parsed.replace('.', '')
+        wdate = wdate[:4] + '-' + wdate[4:6] + '-' + wdate[6:]
+        item['wdate'] = wdate
         item['author'] = text[4].split(':')[-1].strip()
         item['readcount'] = text[6].split(':')[-1].strip()
 
