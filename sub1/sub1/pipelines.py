@@ -4,12 +4,8 @@ from scrapy.pipelines.images import ImagesPipeline
 from urllib.parse import urlparse, parse_qs
 import os
 
-import mysql.connector
-from mysql.connector import Error
-
-
 import pymysql
-
+import hashlib
 
 conn = pymysql.connect(host='172.30.1.100',
                        port=3306,
@@ -24,19 +20,41 @@ def insert_item_to_db(item):
     try:
         cursor = conn.cursor()
 
-        # INSERT 쿼리
-        sql = "INSERT INTO sub01 (nttId, title, wdate, author, readcount, contentnum, image_urls, imgpath) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        cursor.execute (sql, (
+        # INSERT 쿼리 (테이블)
+        sql = "INSERT INTO sub04 (nttId, domain, title, wdate, author, readcount, content, url_link, category) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        cursor.execute(sql, (
             item['nttId'],
+            item['domain'],
             item['title'],
             item['wdate'],
             item['author'],
             item['readcount'],
             ' &&& '.join(item['contentnum']),
-            ' &&& '.join(item['image_urls']),
-            ' &&& '.join(item['imgpath'])
+            item['url_link'],
+            item['category']
+            # ' &&& '.join(item['image_urls']),
+            # ' &&& '.join(item['imgpath'])
         )
         )
+
+        # INSERT 쿼리 (데이터)
+        sql = "INSERT INTO datafile (nttId, origin_name, file_hash, filesrc) VALUES (%s, %s, %s, %s)"
+
+        nttId = item['nttId']
+        original_filename = item['original_filename']
+        imgpath = item['imgpath']
+        imgsrc = item['imgsrc']
+
+        listlen = len(original_filename)
+
+        for i in range(listlen):
+            cursor.execute(sql, (
+                nttId,
+                original_filename[i],
+                imgpath[i],
+                imgsrc[i]
+            ))
+
         conn.commit()
         cursor.close()
 
@@ -57,13 +75,17 @@ class CustomImagesPipeline(ImagesPipeline):
         query_params = parse_qs(parsed_url.query)
         file_sn = query_params.get('fileSn', [''])[0]
         nttId = item['nttId']
-        return f"{nttId}_{file_sn}.jpg"
+
+        # 파일 경로에 폴더 경로와 파일 이름을 추가하여 반환
+        return f"{nttId}/{nttId}_{file_sn}.jpg"
 
     def item_completed(self, results, item, info):
         if 'image_urls' in item:
+            # 이미지 다운로드 경로 대신 파일 이름으로 item['imgpath']에 저장
             item['imgpath'] = [x['path'] for ok, x in results if ok]
 
             # DB에 아이템 삽입
             insert_item_to_db(item)
 
         return item
+

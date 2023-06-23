@@ -14,13 +14,15 @@ now = datetime.now()
 
 class Sub2Item(scrapy.Item):
     nttId = scrapy.Field()
+    domain = Field()
     title_main = scrapy.Field()  # 메인 제목
     title_sub = scrapy.Field()  # 서브 제목
     wdate = scrapy.Field()  # 등록일
     author = scrapy.Field()  # 작성자
     readcount = scrapy.Field()  # 조회수
     content = scrapy.Field()  # 글 내용
-    
+    url_link = Field()
+    category = Field()
     filesrc = scrapy.Field() # 파일 다운로드 링크
     filename = scrapy.Field() # 파일 명 어떻게 저장할지 ..
 

@@ -20,8 +20,14 @@ class Sub1Item(scrapy.Item):
     # cdate = now.strftime('$Y-%m-%d %H:%M:%S')   # ex) 2021-12-22 15:46:26
     imgsrc = scrapy.Field()  # 이미지 link
     contentnum = scrapy.Field()  # 몇번째 이미지에 해당하는 본문들인지 알기 위한 용도.
+    original_filename = scrapy.Field() # 원본 파일 이름
+    domain = Field()
+    url_link = Field()
+    category = Field()
 
     images = Field()            # 크롤링 이미지 다운로드에 필요한 필수 요소 두가지
     image_urls = Field()    # URL에 입력시 바로 다운로드
 
     imgpath = scrapy.Field()  # 파일이 저장될 제목
+
+

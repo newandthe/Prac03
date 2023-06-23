@@ -67,8 +67,8 @@ ROBOTSTXT_OBEY = False
 #     'apt_collection.pipelines.AptCollectionPipeline': 1
 # }
 ITEM_PIPELINES = {'scrapy.pipelines.images.ImagesPipeline': 1}
-FILES_STORE = '/home/jsk/sub01'
-IMAGES_STORE = '/home/jsk/sub01'
+FILES_STORE = 'D:/Prac03_Download'
+IMAGES_STORE = 'D:/Prac03_Download'
 
 
 
